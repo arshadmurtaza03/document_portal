@@ -2,7 +2,8 @@
 # Environment Variables (API Keys and Secrets)
 .env
 
-# Local Uploads folder (Storage for PDFs)
+#
+document_portal.egg-info
 
 
 # Python bytecode and cache

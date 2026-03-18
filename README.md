@@ -17,7 +17,7 @@ code .
 ## for conda env setup
 
 ```
-conda create -p <env_name> python=3.10 -y
+conda create -p <env_name> python=3.12 -y
 ```
 
 ```
