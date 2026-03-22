@@ -9,4 +9,6 @@ langchain-huggingface
 sentence-transformers
 pypdf
 faiss-cpu
+structlog
+PyMuPDF
  -e .
