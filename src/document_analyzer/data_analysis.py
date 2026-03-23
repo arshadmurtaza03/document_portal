@@ -6,7 +6,7 @@ from exception.custom_exception import DocumentPortalException
 from model.models import *
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_classic.output_parsers import OutputFixingParser
-from prompt.prompt_library import *
+from prompt.prompt_library import PROPMT_REGISTRY
 
 class DocumentAnalyzer:
     """
@@ -23,7 +23,7 @@ class DocumentAnalyzer:
             self.parser = JsonOutputParser(pydantic_object=Metadata)
             self.fixing_parser = OutputFixingParser.from_llm(parser=self.parser, llm=self.llm)
             
-            self.prompt = prompt
+            self.prompt = PROPMT_REGISTRY["document_analysis"]
             
             self.log.info("DocumentAnalyzer initialized successfully")
             
@@ -54,7 +54,6 @@ class DocumentAnalyzer:
 
         except Exception as e:
             self.log.error("Metadata analysis failed", error=str(e))
-            # FIXED: Added 'sys'
-            raise DocumentPortalException("Metadata extraction failed", sys) from e
+            raise DocumentPortalException("Metadata extraction failed",sys)
         
     
