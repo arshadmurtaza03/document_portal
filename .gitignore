@@ -2,8 +2,11 @@
 # Environment Variables (API Keys and Secrets)
 .env
 
-#
+#document_portal.egg-info 
 document_portal.egg-info
+
+#data 
+data/
 
 
 # Python bytecode and cache
