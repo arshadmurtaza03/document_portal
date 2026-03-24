@@ -11,6 +11,8 @@ data/
 #faiss_index
 faiss_index/
 
+archive/
+
 
 # Python bytecode and cache
 __pycache__/
