@@ -8,6 +8,9 @@ document_portal.egg-info
 #data 
 data/
 
+#faiss_index
+faiss_index/
+
 
 # Python bytecode and cache
 __pycache__/
