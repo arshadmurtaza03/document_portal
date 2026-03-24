@@ -19,7 +19,7 @@ from utils.model_loader import ModelLoader
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
 
-from utils.file_io import _session_id, save_uploaded_files
+from utils.file_io import generate_session_id, save_uploaded_files
 from utils.document_ops import load_documents, concat_for_analysis, concat_for_comparison
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"}
@@ -31,13 +31,13 @@ class FaissManager:
         self.index_dir.mkdir(parents=True, exist_ok=True)
         
         self.meta_path = self.index_dir / "ingested_meta.json"
-        self._meta: Dict[str, Any] = {"rows": {}}
+        self._meta: Dict[str, Any] = {"rows": {}} ## this is dict of rows
         
         if self.meta_path.exists():
             try:
-                self._meta = json.loads(self.meta_path.read_text(encoding="utf-8")) or {"rows": {}}
+                self._meta = json.loads(self.meta_path.read_text(encoding="utf-8")) or {"rows": {}} # load it if alrady there
             except Exception:
-                self._meta = {"rows": {}}
+                self._meta = {"rows": {}} # init the empty one if dones not exists
         
 
         self.model_loader = model_loader or ModelLoader()
@@ -60,12 +60,14 @@ class FaissManager:
         
         
     def add_documents(self,docs: List[Document]):
+        
         if self.vs is None:
             raise RuntimeError("Call load_or_create() before add_documents_idempotent().")
         
         new_docs: List[Document] = []
         
         for d in docs:
+            
             key = self._fingerprint(d.page_content, d.metadata or {})
             if key in self._meta["rows"]:
                 continue
@@ -79,6 +81,7 @@ class FaissManager:
         return len(new_docs)
     
     def load_or_create(self,texts:Optional[List[str]]=None, metadatas: Optional[List[dict]] = None):
+        ## if we running first time then it will not go in this block
         if self._exists():
             self.vs = FAISS.load_local(
                 str(self.index_dir),
@@ -86,9 +89,10 @@ class FaissManager:
                 allow_dangerous_deserialization=True,
             )
             return self.vs
+        
+        
         if not texts:
             raise DocumentPortalException("No existing FAISS index and no data to create one", sys)
-        
         self.vs = FAISS.from_texts(texts=texts, embedding=self.emb, metadatas=metadatas or [])
         self.vs.save_local(str(self.index_dir))
         return self.vs
@@ -106,7 +110,7 @@ class ChatIngestor:
             self.model_loader = ModelLoader()
             
             self.use_session = use_session_dirs
-            self.session_id = session_id or _session_id()
+            self.session_id = session_id or generate_session_id()
             
             self.temp_base = Path(temp_base); self.temp_base.mkdir(parents=True, exist_ok=True)
             self.faiss_base = Path(faiss_base); self.faiss_base.mkdir(parents=True, exist_ok=True)
@@ -126,10 +130,10 @@ class ChatIngestor:
         
     def _resolve_dir(self, base: Path):
         if self.use_session:
-            d = base / self.session_id
-            d.mkdir(parents=True, exist_ok=True)
+            d = base / self.session_id # e.g. "faiss_index/abc123"
+            d.mkdir(parents=True, exist_ok=True) # creates dir if not exists
             return d
-        return base
+        return base # fallback: "faiss_index/"
         
     def _split(self, docs: List[Document], chunk_size=1000, chunk_overlap=200) -> List[Document]:
         splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
@@ -150,6 +154,8 @@ class ChatIngestor:
                 raise ValueError("No valid documents loaded")
             
             chunks = self._split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+            
+            ## FAISS manager very very important class for the docchat
             fm = FaissManager(self.faiss_dir, self.model_loader)
             
             texts = [c.page_content for c in chunks]
@@ -179,7 +185,7 @@ class DocHandler:
     def __init__(self, data_dir: Optional[str] = None, session_id: Optional[str] = None):
         self.log = CustomLogger().get_logger(__name__)
         self.data_dir = data_dir or os.getenv("DATA_STORAGE_PATH", os.path.join(os.getcwd(), "data", "document_analysis"))
-        self.session_id = session_id or _session_id("session")
+        self.session_id = session_id or generate_session_id("session")
         self.session_path = os.path.join(self.data_dir, self.session_id)
         os.makedirs(self.session_path, exist_ok=True)
         self.log.info("DocHandler initialized", session_id=self.session_id, session_path=self.session_path)
@@ -221,7 +227,7 @@ class DocumentComparator:
     def __init__(self, base_dir: str = "data/document_compare", session_id: Optional[str] = None):
         self.log = CustomLogger().get_logger(__name__)
         self.base_dir = Path(base_dir)
-        self.session_id = session_id or _session_id()
+        self.session_id = session_id or generate_session_id()
         self.session_path = self.base_dir / self.session_id
         self.session_path.mkdir(parents=True, exist_ok=True)
         self.log.info("DocumentComparator initialized", session_path=str(self.session_path))

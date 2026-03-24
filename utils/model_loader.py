@@ -7,7 +7,7 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 # from langchain_openai import ChatOpenAI
-# from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
 log = CustomLogger().get_logger(__name__)
@@ -37,15 +37,25 @@ class ModelLoader:
             log.error("Missing environment variables", missing_vars=missing)
             raise DocumentPortalException("Missing environment variables", sys)
         log.info("Environment variables validated", available_keys=[k for k in self.api_keys if self.api_keys[k]])
-        
+            
     def load_embeddings(self):
         """
         Load and return the embedding model.
         """
         try:
             log.info("Loading embedding model...")
+            
+            # Safely get the provider, default to google if not found
+            provider = self.config["embedding_model"].get("provider", "google")
             model_name = self.config["embedding_model"]["model_name"]
-            return GoogleGenerativeAIEmbeddings(model=model_name)
+            
+            if provider == "google":
+                return GoogleGenerativeAIEmbeddings(model=model_name)
+            elif provider == "huggingface":
+                return HuggingFaceEmbeddings(model_name=model_name)
+            else:
+                raise ValueError(f"Unsupported embedding provider: {provider}")
+                
         except Exception as e:
             log.error("Error loading embedding model", error=str(e))
             raise DocumentPortalException("Failed to load embedding model", sys)
@@ -60,7 +70,7 @@ class ModelLoader:
 
         log.info("Loading LLM...")
         
-        provider_key = os.getenv("LLM_PROVIDER", "groq")  # Default groq
+        provider_key = os.getenv("LLM_PROVIDER", "google")  # Default google
         if provider_key not in llm_block:
             log.error("LLM provider not found in config", provider_key=provider_key)
             raise ValueError(f"Provider '{provider_key}' not found in config")
