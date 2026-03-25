@@ -25,7 +25,7 @@ Resources:
   MyECRRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: documentportal
+      RepositoryName: documentportalliveclass
       ImageScanningConfiguration:
         ScanOnPush: true
       ImageTagMutability: MUTABLE
