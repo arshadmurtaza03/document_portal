@@ -18,3 +18,4 @@ fastapi==0.135.2
 uvicorn==0.42.0
 python-multipart==0.0.22
 docx2txt==0.9
+-e .
