@@ -38,11 +38,15 @@ app.add_middleware(
 #     # templates/index.html ko render karega
 #     return templates.TemplateResponse("index.html", {"request": request})
 
+
 @app.get("/", response_class=HTMLResponse)
 async def serve_ui(request: Request):
-    resp = templates.TemplateResponse("index.html", {"request": request})
-    resp.headers["Cache-Control"] = "no-store"   # <- force fresh
-    return resp
+    # templates/index.html ko render karega
+    return templates.TemplateResponse(
+        request=request, 
+        name="index.html", 
+        context={"request": request}
+    )
 
 @app.get("/health")
 def health() -> Dict[str, str]:

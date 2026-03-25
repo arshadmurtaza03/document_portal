@@ -164,14 +164,8 @@ Resources:
             - Name: LANGCHAIN_PROJECT
               Value: DOCUMENT PORTAL
           Secrets:
-            - Name: GROQ_API_KEY
-              ValueFrom: arn:aws:secretsmanager:us-east-1:685057748560:secret:GROQ_API_KEY
-            - Name: HF_TOKEN
-              ValueFrom: arn:aws:secretsmanager:us-east-1:685057748560:secret:HF_TOKEN
-            - Name: GOOGLE_API_KEY
-              ValueFrom: arn:aws:secretsmanager:us-east-1:685057748560:secret:GOOGLE_API_KEY
-            - Name: LANGCHAIN_API_KEY
-              ValueFrom: arn:aws:secretsmanager:us-east-1:685057748560:secret:LANGCHAIN_API_KEY
+            - Name: API_KEYS
+              ValueFrom: arn:aws:secretsmanager:ap-southeast-2:008041186284:secret:api_keys-qZJHWK
           LogConfiguration:
             LogDriver: awslogs
             Options:
