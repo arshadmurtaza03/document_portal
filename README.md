@@ -3,15 +3,13 @@
 ![CI Pipeline](https://github.com/arshadmurtaza03/document_portal/actions/workflows/ci.yaml/badge.svg)
 ![CD Pipeline](https://github.com/arshadmurtaza03/document_portal/actions/workflows/aws.yaml/badge.svg)
 
-**🔴 Live Application:** [http://3.106.54.215:8080](http://3.106.54.215:8080)
-
 ---
 
 ## 📖 Overview
 
 Document Portal is a FastAPI-based web application for analyzing, comparing, and chatting with documents using LLMs. Upload PDFs to get automated summaries, compare two versions side-by-side, and ask natural-language questions over your files using a RAG (Retrieval-Augmented Generation) pipeline.
 
-The project demonstrates end-to-end AI engineering — an LLM + RAG workflow (LangChain + embeddings + FAISS) built into a production FastAPI app, containerized with Docker, and deployed to AWS with a full CI/CD pipeline.
+The project demonstrates end-to-end AI engineering — an **LLM + RAG workflow (LangChain + embeddings + FAISS)** built into a production FastAPI app, containerized with Docker, and deployed to AWS with a full **CI/CD pipeline.**
 
 ---
 
