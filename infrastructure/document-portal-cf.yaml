@@ -103,7 +103,7 @@ Resources:
     Properties:
       ClusterName: document-portal-cluster
 
-  ### ECS Execution Role with Secrets + Logs
+### ECS Execution Role with Secrets + Logs + ECR Access
   ECSExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -116,7 +116,7 @@ Resources:
               Service: ecs-tasks.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: ecs-secrets-logs-access
+        - PolicyName: ecs-execution-policy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -125,10 +125,11 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - logs:CreateLogGroup
-                Resource: "*"
-              - Effect: Allow
-                Action:
                   - secretsmanager:GetSecretValue
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
                 Resource: "*"
 
   ### Security Group
@@ -143,7 +144,7 @@ Resources:
           ToPort: 8080
           CidrIp: 0.0.0.0/0
 
-  ### ECS Task Definition
+### ECS Task Definition
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -154,6 +155,7 @@ Resources:
       RequiresCompatibilities:
         - FARGATE
       ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSExecutionRole.Arn
       ContainerDefinitions:
         - Name: document-portal-container
           Image: !Ref ImageUrl
@@ -161,15 +163,15 @@ Resources:
           PortMappings:
             - ContainerPort: 8080
           Environment:
-            - Name: LANGCHAIN_PROJECT
-              Value: DOCUMENT PORTAL
+            - Name: ENV
+              Value: production
           Secrets:
             - Name: API_KEYS
               ValueFrom: arn:aws:secretsmanager:ap-southeast-2:008041186284:secret:api_keys-qZJHWK
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: /ecs/documentportal
+              awslogs-group: /ecs/documentportaltd
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
 
